@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from main import generate_full_company_profile_docx
 
-# Load variabel lingkungan dari .env
+# Load variabel lingkungan dari .env (untuk lokal)
 load_dotenv()
 
 # Konfigurasi halaman
@@ -47,26 +47,24 @@ if menu == "Buat Dokumen Bab II":
         submitted = st.form_submit_button("🚀 Buat Dokumen")
 
     if submitted and company_name.strip():
-        with st.spinner("Sedang membuat dan mengunggah dokumen..."):
+        with st.spinner("Sedang membuat dokumen..."):
             try:
-                file_path, drive_url = generate_full_company_profile_docx(
+                # Panggil fungsi tanpa upload ke Google Drive
+                file_path, _ = generate_full_company_profile_docx(
                     company_name=company_name.strip(),
                     temperature=temperature,
-                    upload=True,
-                    drive_folder_id=os.getenv("GOOGLE_DRIVE_FOLDER_ID"),
+                    upload=False,
                     model_name=selected_model
                 )
 
                 with open(file_path, "rb") as f:
-                    st.success("✅ Dokumen berhasil dibuat dan diupload ke Google Drive!")
+                    st.success("✅ Dokumen berhasil dibuat!")
                     st.download_button(
                         label="📥 Download DOCX",
                         data=f,
                         file_name=os.path.basename(file_path),
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     )
-                    if drive_url:
-                        st.markdown(f"📤 [Lihat file di Google Drive]({drive_url})", unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"❌ Terjadi kesalahan: {e}")
@@ -83,10 +81,9 @@ elif menu == "Tentang Aplikasi":
     - Penyusunan struktur BAB II
     - Konten dihasilkan otomatis menggunakan Gemini (Google AI)
     - Referensi ditampilkan secara eksplisit
-    - Dokumen otomatis diupload ke Google Drive
     - Pemilihan model Gemini dan kontrol kreativitas (temperature)
 
-    **Teknologi yang Digunakan:** Streamlit · Gemini API · Python-docx · Google Drive API
+    **Teknologi yang Digunakan:** Streamlit · Gemini API · Python-docx
     """)
 
 # === FOOTER ===

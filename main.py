@@ -8,10 +8,15 @@ from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from datetime import datetime
 from dotenv import load_dotenv
+import streamlit as st
 
 # Load API Key
 load_dotenv()
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+# Gunakan secrets dari Streamlit Cloud jika ada, fallback ke .env
+GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
+
+# Konfigurasi Gemini API
+genai.configure(api_key=GOOGLE_API_KEY)
 
 # Struktur Bab II
 document_structure = [
