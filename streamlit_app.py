@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from main import generate_full_company_profile_docx
 
-# Load variabel lingkungan dari .env (untuk lokal)
+# Load env untuk lokal
 load_dotenv()
 
 # Konfigurasi halaman
@@ -49,8 +49,7 @@ if menu == "Buat Dokumen Bab II":
     if submitted and company_name.strip():
         with st.spinner("Sedang membuat dokumen..."):
             try:
-                # Panggil fungsi tanpa upload ke Google Drive
-                file_path, _ = generate_full_company_profile_docx(
+                file_path, _, tokens_in, tokens_out = generate_full_company_profile_docx(
                     company_name=company_name.strip(),
                     temperature=temperature,
                     upload=False,
@@ -65,6 +64,11 @@ if menu == "Buat Dokumen Bab II":
                         file_name=os.path.basename(file_path),
                         mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
                     )
+
+                # Tampilkan token usage
+                st.markdown(f"🔢 **Token Input**: `{tokens_in}`")
+                st.markdown(f"🧾 **Token Output**: `{tokens_out}`")
+                st.caption("💡 Token dihitung dari total prompt dan hasil model untuk seluruh bagian dokumen.")
 
             except Exception as e:
                 st.error(f"❌ Terjadi kesalahan: {e}")
