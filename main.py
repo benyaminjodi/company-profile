@@ -7,12 +7,6 @@ from docx.oxml.ns import qn
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Load API Key dari .env atau Streamlit secrets
-import streamlit as st
-load_dotenv()
-GOOGLE_API_KEY = st.secrets.get("GOOGLE_API_KEY") or os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=GOOGLE_API_KEY)
-
 # Struktur Bab II
 document_structure = [
     {"title": "2.1 Latar Belakang dan Sejarah Perusahaan"},
@@ -33,6 +27,15 @@ document_structure = [
     ]},
     {"title": "2.6 Benchmark Perusahaan Global Terminal Operator (GTO)"}
 ]
+
+def get_google_api_key():
+    """Ambil API key dari st.secrets (cloud) atau .env (lokal)"""
+    try:
+        import streamlit as st
+        return st.secrets.get("GOOGLE_API_KEY")
+    except:
+        load_dotenv()
+        return os.getenv("GOOGLE_API_KEY")
 
 def fetch_section_content(company_name, section_title, temperature=0.7, model_name="models/gemini-1.5-flash-latest"):
     prompt = f"""
@@ -72,6 +75,11 @@ def add_table_of_contents(paragraph):
     r_element.append(fldChar3)
 
 def generate_full_company_profile_docx(company_name, upload=False, drive_folder_id=None, temperature=0.7, model_name="models/gemini-1.5-flash-latest"):
+    api_key = get_google_api_key()
+    if not api_key:
+        raise ValueError("API Key tidak ditemukan. Pastikan ada di .env atau st.secrets.")
+    genai.configure(api_key=api_key)
+
     doc = Document()
 
     doc.add_heading("BAB II  PENDAHULUAN", level=1)
