@@ -39,6 +39,7 @@ def get_google_api_key():
 
 def fetch_section_content(company_name, section_title, temperature=0.7, model_name="models/gemini-1.5-flash-latest"):
     prompt = f"""
+Kamu adalah seorang profesional senior management consultant yang ahli dalam membuat profil perusahaan.
 Tulis bagian "{section_title}" untuk profil perusahaan "{company_name}".
 Gunakan bahasa formal dan komprehensif. Tambahkan daftar sumber referensi jika relevan di bagian akhir sebagai list bernomor.
 """
