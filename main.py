@@ -1,5 +1,5 @@
+# main.py
 import os
-import re
 import google.generativeai as genai
 from docx import Document
 from docx.oxml import OxmlElement
@@ -53,12 +53,6 @@ Gunakan bahasa formal dan komprehensif. Tambahkan daftar sumber referensi jika r
     except Exception as e:
         return f"[GAGAL MENGAMBIL KONTEN: {e}]", 0, 0
 
-def split_content_and_sources(text):
-    match = re.split(r"Sumber:|Referensi:", text, maxsplit=1, flags=re.IGNORECASE)
-    content = match[0].strip()
-    sources = match[1].strip().splitlines() if len(match) > 1 else []
-    return content, sources
-
 def add_table_of_contents(paragraph):
     run = paragraph.add_run()
     fldChar = OxmlElement('w:fldChar')
@@ -88,7 +82,6 @@ def generate_full_company_profile_docx(company_name, upload=False, drive_folder_
     add_table_of_contents(toc_paragraph)
     doc.add_paragraph("(Klik kanan pada daftar isi di Microsoft Word > Update field untuk menampilkan halaman)")
 
-    all_sources = []
     total_tokens_in = 0
     total_tokens_out = 0
 
@@ -98,24 +91,14 @@ def generate_full_company_profile_docx(company_name, upload=False, drive_folder_
             for sub in section["subsections"]:
                 doc.add_heading(sub["title"], level=3)
                 content, tokens_in, tokens_out = fetch_section_content(company_name, sub["title"], temperature, model_name)
-                main_text, sources = split_content_and_sources(content)
-                doc.add_paragraph(main_text)
-                all_sources.extend(sources)
+                doc.add_paragraph(content.strip())
                 total_tokens_in += tokens_in
                 total_tokens_out += tokens_out
         else:
             content, tokens_in, tokens_out = fetch_section_content(company_name, section["title"], temperature, model_name)
-            main_text, sources = split_content_and_sources(content)
-            doc.add_paragraph(main_text)
-            all_sources.extend(sources)
+            doc.add_paragraph(content.strip())
             total_tokens_in += tokens_in
             total_tokens_out += tokens_out
-
-    if all_sources:
-        doc.add_page_break()
-        doc.add_heading("Daftar Sumber Referensi", level=1)
-        for src in all_sources:
-            doc.add_paragraph(src.strip(), style='List Number')
 
     safe_name = re.sub(r'[^\w\s-]', '', company_name).replace(" ", "_")
     filename = f"Bab_II_Profil_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
