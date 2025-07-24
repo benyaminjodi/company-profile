@@ -38,6 +38,17 @@ document_structure_bab3 = [
     {"title": "3.4 Ketercapaian *Key Performance Indicators*"}
 ]
 
+document_structure_bab4 = [
+    {"title": "4.1 Analisis Strength, Weakness, Opportunity & Threat (SWOT)"},
+    {"title": "4.2 Matriks TOWS dan Kesimpulan Arah Pengembangan Bisnis Perusahaan"},
+    {"title": "4.3 Analisis Industri dan Daya Saing (BUMN) Pada Sektor Bisnis", "subsections": [
+        {"title": "4.3.1 Analisis Lingkungan Makro"},
+        {"title": "4.3.2 Analisis Industri Kepelabuhanan dan Logistik"},
+        {"title": "4.3.3 Analisis PESTLE"},
+        {"title": "4.3.4 Analisis Daya Saing dan Posisi"},
+    ]}
+]
+
 def get_google_api_key():
     try:
         import streamlit as st
@@ -144,6 +155,43 @@ def generate_bab3_docx(company_name, temperature=0.7, model_name="models/gemini-
 
     safe_name = re.sub(r'[^\w\s-]', '', company_name).replace(" ", "_")
     filename = f"Bab_III_Kinerja_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+    doc.save(filename)
+
+    return filename, total_tokens_in, total_tokens_out
+
+def generate_bab4_docx(company_name, temperature=0.7, model_name="models/gemini-1.5-flash-latest"):
+    api_key = get_google_api_key()
+    if not api_key:
+        raise ValueError("API Key tidak ditemukan.")
+    genai.configure(api_key=api_key)
+
+    doc = Document()
+    doc.add_heading("BAB IV ANALISIS POSISI PERUSAHAAN", level=1)
+
+    toc_paragraph = doc.add_paragraph()
+    add_table_of_contents(toc_paragraph)
+    doc.add_paragraph("(Klik kanan pada daftar isi di Microsoft Word > Update field untuk menampilkan halaman)")
+
+    total_tokens_in = 0
+    total_tokens_out = 0
+
+    for section in document_structure_bab4:
+        doc.add_heading(section["title"], level=2)
+        if "subsections" in section:
+            for sub in section["subsections"]:
+                doc.add_heading(sub["title"], level=3)
+                content, tokens_in, tokens_out = fetch_section_content(company_name, sub["title"], temperature, model_name)
+                doc.add_paragraph(content.strip())
+                total_tokens_in += tokens_in
+                total_tokens_out += tokens_out
+        else:
+            content, tokens_in, tokens_out = fetch_section_content(company_name, section["title"], temperature, model_name)
+            doc.add_paragraph(content.strip())
+            total_tokens_in += tokens_in
+            total_tokens_out += tokens_out
+
+    safe_name = re.sub(r'[^\w\s-]', '', company_name).replace(" ", "_")
+    filename = f"Bab_IV_Analisis_Posisi_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
     return filename, total_tokens_in, total_tokens_out
