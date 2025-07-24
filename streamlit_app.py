@@ -3,7 +3,7 @@
 import streamlit as st
 import os
 from dotenv import load_dotenv
-from main import generate_bab2_docx, generate_bab3_docx
+from main import generate_bab2_docx, generate_bab3_docx, generate_bab4_docx
 
 # Load env lokal
 load_dotenv()
