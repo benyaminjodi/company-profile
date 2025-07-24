@@ -1,5 +1,7 @@
 # main.py
+
 import os
+import re
 import google.generativeai as genai
 from docx import Document
 from docx.oxml import OxmlElement
@@ -28,8 +30,15 @@ document_structure = [
     {"title": "2.6 Benchmark Perusahaan Global Terminal Operator (GTO)"}
 ]
 
+# Struktur Bab III
+document_structure_bab3 = [
+    {"title": "3.1 *Milestone* Capaian Perusahaan"},
+    {"title": "3.2 Kinerja Operasional Perusahaan"},
+    {"title": "3.3 Kinerja Keuangan Perusahaan"},
+    {"title": "3.4 Ketercapaian *Key Performance Indicators*"}
+]
+
 def get_google_api_key():
-    """Ambil API key dari st.secrets (cloud) atau .env (lokal)"""
     try:
         import streamlit as st
         return st.secrets.get("GOOGLE_API_KEY")
@@ -69,15 +78,15 @@ def add_table_of_contents(paragraph):
     r_element.append(fldChar2)
     r_element.append(fldChar3)
 
-def generate_full_company_profile_docx(company_name, upload=False, drive_folder_id=None, temperature=0.7, model_name="models/gemini-1.5-flash-latest"):
+def generate_bab2_docx(company_name, temperature=0.7, model_name="models/gemini-1.5-flash-latest"):
     api_key = get_google_api_key()
     if not api_key:
-        raise ValueError("API Key tidak ditemukan. Pastikan ada di .env atau st.secrets.")
+        raise ValueError("API Key tidak ditemukan.")
     genai.configure(api_key=api_key)
 
     doc = Document()
-
     doc.add_heading("BAB II  PENDAHULUAN", level=1)
+
     toc_paragraph = doc.add_paragraph()
     add_table_of_contents(toc_paragraph)
     doc.add_paragraph("(Klik kanan pada daftar isi di Microsoft Word > Update field untuk menampilkan halaman)")
@@ -104,4 +113,33 @@ def generate_full_company_profile_docx(company_name, upload=False, drive_folder_
     filename = f"Bab_II_Profil_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
     doc.save(filename)
 
-    return filename, None, total_tokens_in, total_tokens_out
+    return filename, total_tokens_in, total_tokens_out
+
+def generate_bab3_docx(company_name, temperature=0.7, model_name="models/gemini-1.5-flash-latest"):
+    api_key = get_google_api_key()
+    if not api_key:
+        raise ValueError("API Key tidak ditemukan.")
+    genai.configure(api_key=api_key)
+
+    doc = Document()
+    doc.add_heading("BAB III  KINERJA PERUSAHAAN TAHUN 2021–2024", level=1)
+
+    toc_paragraph = doc.add_paragraph()
+    add_table_of_contents(toc_paragraph)
+    doc.add_paragraph("(Klik kanan pada daftar isi di Microsoft Word > Update field untuk menampilkan halaman)")
+
+    total_tokens_in = 0
+    total_tokens_out = 0
+
+    for section in document_structure_bab3:
+        doc.add_heading(section["title"], level=2)
+        content, tokens_in, tokens_out = fetch_section_content(company_name, section["title"], temperature, model_name)
+        doc.add_paragraph(content.strip())
+        total_tokens_in += tokens_in
+        total_tokens_out += tokens_out
+
+    safe_name = re.sub(r'[^\w\s-]', '', company_name).replace(" ", "_")
+    filename = f"Bab_III_Kinerja_{safe_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.docx"
+    doc.save(filename)
+
+    return filename, total_tokens_in, total_tokens_out
