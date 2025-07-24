@@ -22,7 +22,7 @@ st.markdown("""
     </div>
 """, unsafe_allow_html=True)
 
-menu = st.sidebar.selectbox("📂 Navigasi", ["Buat Dokumen Bab II", "Buat Dokumen Bab III", "Tentang Aplikasi"])
+menu = st.sidebar.selectbox("📂 Navigasi", ["Buat Dokumen Bab II", "Buat Dokumen Bab III", "Buat Dokumen Bab IV", "Tentang Aplikasi"])
 
 if menu == "Buat Dokumen Bab II":
     st.subheader("🧾 Formulir Input Bab II")
