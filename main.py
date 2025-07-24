@@ -50,8 +50,12 @@ def fetch_section_content(company_name, section_title, temperature=0.7, model_na
     prompt = f"""
 Kamu adalah seorang profesional senior management consultant yang ahli dalam membuat profil perusahaan.
 Tulis bagian "{section_title}" untuk profil perusahaan "{company_name}".
-Gunakan bahasa formal dan komprehensif. Tambahkan daftar sumber referensi jika relevan di bagian akhir sebagai list bernomor.
+Gunakan bahasa formal dan komprehensif.
+
+Tambahkan daftar sumber referensi aktual dari publikasi resmi, laporan keuangan, kementerian terkait, atau sumber berita ekonomi.
+Tuliskan referensi tersebut dalam bentuk daftar bernomor dan sebutkan judul publikasi serta tahun atau tautannya bila diketahui.
 """
+
     try:
         model = genai.GenerativeModel(model_name=model_name)
         response = model.generate_content(prompt)
